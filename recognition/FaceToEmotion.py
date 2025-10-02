@@ -20,7 +20,7 @@ class FaceToEmotion:
     def analyze_file(self, path: str):
         img = cv2.imread(path)
         if img is None:
-            raise FileNotFoundError(f"Cannot read image: {path}")##默认用户乱来，直接捕获最常见的错误
+            raise FileNotFoundError(f"Cannot read image: {path}")##提前抛出错误，不用浪费时间导入fer
         results = self.detector.detect_emotions(img)
         print(results)##调试用代码，上线删除
 
@@ -47,7 +47,6 @@ class FaceToEmotion:
         return outputs
 
     def draw_bbox(self, image_path: str, results, save_path: str = None):
-        """在图片上画出情绪识别的 bbox，并保存/展示"""
         img = cv2.imread(image_path)
         for r in results:
             x, y, w, h = r["bbox"]
@@ -68,14 +67,5 @@ class FaceToEmotion:
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    ###测试代码上线删除
-    fte = FaceToEmotion()
-    # 获取脚本所在目录 recognition/
-    SCRIPT_DIR = Path(__file__).resolve().parent#防止用户在其他路径执行
-    #相对转绝对
-    IMG_PATH = SCRIPT_DIR.parent / "data" / "testset" / "test1.png"
 
-    result = fte.analyze_file(str(IMG_PATH))
-    print(json.dumps(result, ensure_ascii=False, indent=2))
 
