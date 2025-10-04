@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 from config.settings import APP_TITLE, PAGE_TITLE, LAYOUT
 from state.session_state import ensure_state
@@ -16,10 +17,37 @@ ensure_state()
 with st.sidebar:
     api_key = render_sidebar()
 
+# 顶部 Tab：沟通训练 / 视频情绪识别
 tab1, tab2 = st.tabs(["🩺 沟通训练", "🎬 视频情绪识别"])
 
 with tab1:
     st.markdown("**角色：** 你是一名护士，正在与不孕症患者小林进行标准化沟通训练。")
+
+    # —— 开局种子：仅当已输入 API Key 且历史为空且未种子时执行一次 ——
+    if api_key and not st.session_state.get("initial_seeded", False) and not st.session_state.history:
+        opening_line = "我已经努力了很久了，感觉没有希望了"
+
+        # 1) 插入病人开场白（不增加对话轮次）
+        st.session_state.history.append(("病人小林", opening_line, None))
+
+        # 2) 初始情绪（可按需调整）
+        base_emotion = {"anxiety": 0.85, "sadness": 0.80, "hope": 0.15}
+
+        # 3) 关键词二次修正 + 裁剪到 [0,1]
+        detected_keywords, effect = st.session_state.stress_model.detect_keywords(opening_line)
+        adjusted = {
+            "anxiety": max(0.0, min(1.0, base_emotion["anxiety"] + effect.get("anxiety", 0.0))),
+            "sadness": max(0.0, min(1.0, base_emotion["sadness"] + effect.get("sadness", 0.0))),
+            "hope":    max(0.0, min(1.0, base_emotion["hope"]    + effect.get("hope",    0.0))),
+        }
+
+        # 4) 评估一次（round=0），让仪表盘立即可用
+        assessment = st.session_state.stress_model.assess_emotion_pattern(adjusted, conversation_round=0)
+        st.session_state.assessment_history.append(assessment)
+        st.session_state.emotions.append(adjusted)
+
+        # 5) 只种子一次
+        st.session_state.initial_seeded = True
 
     # 主区域：仪表盘（若已有评估）
     if st.session_state.assessment_history:

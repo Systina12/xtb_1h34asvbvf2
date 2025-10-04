@@ -52,6 +52,7 @@ def render_sidebar():
         st.session_state.assessment_history = []
         st.session_state.conversation_round = 0
         st.session_state.api_evaluation = None
+        st.session_state.initial_seeded = False  # ⭐ 新增：允许下次输入 Key 后再次自动种子
         st.rerun()
 
     return api_key

@@ -20,3 +20,5 @@ def ensure_state():
             st.session_state[k] = v if k != "stress_model" else PsychologicalStressModel(KEYWORD_RULES)
     if st.session_state.get("stress_model") is None:
         st.session_state.stress_model = PsychologicalStressModel(KEYWORD_RULES)
+
+
