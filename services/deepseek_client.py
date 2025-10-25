@@ -69,7 +69,7 @@ class DeepSeekClient:
           "emotion_update": {
             "anxiety": 0.8,
             "sadness": 0.9,
-            "hope": 0.1
+            "hope": 0.25
           },
           "nurse_evaluation": {
             "empathy_accuracy_rate": 1.0,
